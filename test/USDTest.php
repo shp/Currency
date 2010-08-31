@@ -547,4 +547,26 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
         );
     }
 
+    /**
+     * @dataProvider formattedStringDataProvider
+     */
+    public function testFormattedStringFormatsCurrencyCorrectly($amountAsFloat, $amountAsString) {
+        $currencyObj = Currency_USD::fromFloat($amountAsFloat);
+        $this->assertEquals("{$amountAsString}", $currencyObj->formattedString(false));
+        $this->assertEquals("\${$amountAsString}", $currencyObj->formattedString(true));
+    }
+
+    public function formattedStringDataProvider() {
+        return array(
+            array(123.45,       "123.45"),
+            array(1.00,         "1.00"),
+            array(1.50,         "1.50"),
+            array(0.50,         "0.50"),
+            array(0.00,         "0.00"),
+            array(158.70,       "158.70"),
+            array(158.07,       "158.07"),
+            array(-158.70,      "-158.70"),
+        );
+    }
+
 }

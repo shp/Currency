@@ -172,7 +172,16 @@ class Currency_USD {
         if ($includeDollarSign !== true && $includeDollarSign !== false) {
             throw new Currency_USD_Exception('Please specify true or false for $includeDollarSign');
         }
-        return ($includeDollarSign ? '$' : '') . $this->toDecimal();
+
+        $dollarSign = '';
+        if ($includeDollarSign) {
+            $dollarSign = '$';
+        }
+        $negativeSign = '';
+        if ($this->isNegative()) {
+            $negativeSign = '-';
+        }
+        return "{$dollarSign}{$negativeSign}{$this->getDollars()}.{$this->_getTwoDigitNumCents()}";
     }
 
     /**
@@ -181,7 +190,7 @@ class Currency_USD {
      * @return string A string representation of this object.
      */
     public function __toString() {
-        return $this->formattedString(false) . "";
+        return $this->formattedString(false);
     }
 
     /**
@@ -541,6 +550,18 @@ class Currency_USD {
         }
 
         throw new Currency_USD_Exception("Unable to parse cents: " . var_export($centsStr, true));
+    }
+
+    /**
+     * Get a two-digit string representation of the number of cents.
+     *
+     * @return string The two-digit string representation.
+     */
+    private function _getTwoDigitNumCents() {
+        if ($this->getCents() < 10) {
+            return "0{$this->getCents()}";
+        }
+        return "{$this->getCents()}";
     }
 
     /**
