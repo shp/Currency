@@ -99,7 +99,7 @@ class Currency_USD {
      *
      * @param float $floatVal The value of the currency object as a float.
      *
-     * @throws Currency_USD_Exception If the float value has partial cents (e.g. 123.456).
+     * @throws Currency_USD_Exception If the float value has partial cents (e.g. 123.456) or is not a float.
      * @return Currency_USD The Currency_USD object.
      */
     public static function fromFloat($floatVal) {
@@ -108,6 +108,10 @@ class Currency_USD {
         // our fromString method here.  I have yet to
         // find a test case that doesn't work this
         // way.
+        if (!is_float($floatVal) && !is_int($floatVal)) {
+            $message = "Given value was not a float: " . var_export($floatVal, true);
+            throw new Currency_USD_Exception($message);
+        }
         return self::fromString($floatVal . '');
     }
 

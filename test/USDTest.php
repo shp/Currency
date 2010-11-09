@@ -264,14 +264,34 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
         );
     }
 
-    public function testCreatingFromInvalidFloatThrowsException() {
-        $invalidFloat = 123.456;
+    /**
+     * @dataProvider invalidCurrencyAsFloatDataProvider
+     */
+    public function testCreatingFromInvalidFloatThrowsException($invalidFloat) {
         try {
             $currency = Currency_USD::fromFloat($invalidFloat);
-            $this->fail("Expected failure because 123.456 is an invalid float");
+            $this->fail("Expected failure because of invalid float: " . var_export($invalidFloat, true));
         } catch (Currency_USD_Exception $e) {
             // We expected this exception
         }
+    }
+    /**
+     * Invalid Currency as float data provider
+     * Returns array:
+     *  - Invalid float values to try
+     */
+    public function invalidCurrencyAsFloatDataProvider() {
+        return array(
+            //    Invalid Float
+            array(123.456),
+            array(true),
+            array(false),
+            array(null),
+            array("string"),
+            array("one"),
+            array("1"),
+            array("1.00"),
+        );
     }
 
     public function testToDecimalWorksWithWholeNumbers() {
@@ -392,7 +412,6 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
      */
     public function testMultiplyingByScalarWorksProperly($floatValue, $scalar, $whatToDoWithPartialCents, $productAsFloat, $expectedException = false) {
         $currencyObj        = Currency_USD::fromFloat($floatValue);
-        $givenProductObj    = Currency_USD::fromFloat($productAsFloat);
 
         try {
             $calculatedProductObj = $currencyObj->multiply($scalar, $whatToDoWithPartialCents);
@@ -406,7 +425,7 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
                 return;
             }
         }
-
+        $givenProductObj    = Currency_USD::fromFloat($productAsFloat);
         $this->assertTrue($givenProductObj->equals($calculatedProductObj));
     }
 
@@ -443,7 +462,6 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
      */
     public function testDividingByScalarWorksProperly($floatValue, $scalar, $whatToDoWithPartialCents, $quotientAsFloat, $expectedException = false) {
         $currencyObj        = Currency_USD::fromFloat($floatValue);
-        $givenQuotientObj    = Currency_USD::fromFloat($quotientAsFloat);
 
         try {
             $calculatedQuotientObj = $currencyObj->divide($scalar, $whatToDoWithPartialCents);
@@ -458,6 +476,7 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
             }
         }
 
+        $givenQuotientObj    = Currency_USD::fromFloat($quotientAsFloat);
         $this->assertTrue($givenQuotientObj->equals($calculatedQuotientObj));
     }
 
