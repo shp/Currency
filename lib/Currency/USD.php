@@ -129,9 +129,9 @@ class Currency_USD {
         }
         if (!is_float($floatVal) && !is_int($floatVal)) {
             $message = "Given value was not a float: " . var_export($floatVal, true);
-            throw new Currency_USD_Exception($message);
+            throw new Currency_USD_Invalid_Value_Exception($message);
         }
-        if (abs(bcsub($floatVal, round(floatVal($floatVal), 2), 5)) > .00001) {
+        if (abs(bcsub($floatVal, round(floatVal($floatVal), 2), 3)) >= .001) {
             $message = "\$floatVal contained incorrect number of decimal values.";
             throw new Currency_USD_Invalid_Value_Exception($message);
         }
