@@ -283,15 +283,27 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
     public function invalidCurrencyAsFloatDataProvider() {
         return array(
             //    Invalid Float
-            array(123.456),
             array(true),
             array(false),
-            array(null),
             array("string"),
             array("one"),
             array("1"),
             array("1.00"),
         );
+    }
+
+    /**
+     * @expectedException Currency_USD_Inaccurate_Value_Exception
+     */
+    public function testExceedinglyPreciseFloatThrowsException() {
+        $currency = Currency_USD::fromFloat(123.1234);
+    }
+
+    /**
+     * @expectedException Currency_USD_Null_Value_Exception
+     */
+    public function testCreatingFromNullFloatThrowsException() {
+        $currency = Currency_USD::fromFloat(null);
     }
 
     public function testToDecimalWorksWithWholeNumbers() {

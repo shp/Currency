@@ -43,9 +43,16 @@ class Currency_USD {
      * @param string $strVal Input string in format $-123.45.
      *
      * @throws Currency_USD_Exception If we are unable to parse the string into a currency.
+     * @throws Currency_USD_Invalid_Value_Exception If the input value is invalid.
      * @return Currency_USD Currency object
      */
     public static function fromString($strVal) {
+        if ($strVal === null) {
+            throw new Currency_USD_Invalid_Value_Exception("\$strVal cannot be null.");
+        }
+        if (!is_string($strVal)) {
+            throw new Currency_USD_Invalid_Value_Exception("\$strVal is not a string");
+        }
         $regex   = "/^[\$]?(\-?)[\$]?([\d,]*)\.?([\d]{0,2})$/";
         $matches = array();
         $result  = preg_match($regex, $strVal, $matches);
@@ -66,9 +73,16 @@ class Currency_USD {
      * @param integer $intVal The integer you want to tunr into a Currency_USD object.
      *
      * @throws Currency_USD_Exception If input value is not an integer.
+     * @throws Currency_USD_Null_Value_Exception If input value is null.
      * @return Currency_USD The value of intVal as a Currency_USD object.
      */
     public static function fromInt($intVal) {
+        if ($intVal === null) {
+            throw new Currency_USD_Null_Value_Exception("\$intVal cannot be null.");
+        }
+        if (!is_int($intVal)) {
+            throw new Currency_USD_Exception("\$intVal is not an int");
+        }
         $positiveValue = abs($intVal);
         $isNegative    = ($intVal < 0);
         return self::fromDollarsAndCents($positiveValue, 0, $isNegative);
@@ -87,6 +101,12 @@ class Currency_USD {
      * @return Currency_USD The Currency_USD object.
      */
     public static function fromDollarsAndCents($dollars, $cents, $isNegative = false) {
+        if ($dollars === null) {
+            throw new Currency_USD_Null_Value_Exception("\$dollars cannot be null.");
+        }
+        if ($cents === null) {
+            throw new Currency_USD_Null_Value_Exception("\$cents cannot be null.");
+        }
         $currencyObj = new Currency_USD();
         $currencyObj->setDollars($dollars);
         $currencyObj->setCents($cents);
@@ -103,14 +123,17 @@ class Currency_USD {
      * @return Currency_USD The Currency_USD object.
      */
     public static function fromFloat($floatVal) {
-        // Instead of doing a bunch of bc_ math here,
-        // we can simply convert to string and use
-        // our fromString method here.  I have yet to
-        // find a test case that doesn't work this
-        // way.
+        if ($floatVal === null) {
+            $message = "\$floatVal cannot be null.";
+            throw new Currency_USD_Invalid_Value_Exception($message);
+        }
         if (!is_float($floatVal) && !is_int($floatVal)) {
             $message = "Given value was not a float: " . var_export($floatVal, true);
             throw new Currency_USD_Exception($message);
+        }
+        if (abs(bcsub($floatVal, round(floatVal($floatVal), 2), 5)) > .00001) {
+            $message = "\$floatVal contained incorrect number of decimal values.";
+            throw new Currency_USD_Invalid_Value_Exception($message);
         }
         return self::fromString($floatVal . '');
     }
@@ -125,6 +148,9 @@ class Currency_USD {
      * @return Currency_USD The Currency_USD object.
      */
     public static function fromNumCents($numCents) {
+        if ($numCents === null) {
+            throw new Currency_USD_Null_Value_Exception("\$numCents cannot be null.");
+        }
         $positiveNumCents = abs($numCents);
 
         if ($positiveNumCents > PHP_INT_MAX) {
@@ -319,13 +345,13 @@ class Currency_USD {
      */
     public function validateDollars($dollars) {
         if (!is_int($dollars)) {
-            throw new Currency_USD_Exception("Dollars must be an int, got: " . var_export($dollars, true));
+            throw new Currency_USD_Invalid_Value_Exception("Dollars must be an int, got: " . var_export($dollars, true));
         }
         if ($dollars < 0) {
-            throw new Currency_USD_Exception("Dollars must be greater than 0, set negative values separately");
+            throw new Currency_USD_Invalid_Value_Exception("Dollars must be greater than 0, set negative values separately");
         }
         if (abs($dollars) > PHP_INT_MAX) {
-            throw new Currency_USD_Exception("Overflow, {$dollars} is greater than PHP_INT_MAX: " . PHP_INT_MAX);
+            throw new Currency_USD_Invalid_Value_Exception("Overflow, {$dollars} is greater than PHP_INT_MAX: " . PHP_INT_MAX);
         }
     }
 
@@ -339,13 +365,13 @@ class Currency_USD {
      */
     public function validateCents($cents) {
         if (!is_int($cents)) {
-            throw new Currency_USD_Exception("Cents must be an int");
+            throw new Currency_USD_Invalid_Value_Exception("Cents must be an int");
         }
         if ($cents >= 100) {
-            throw new Currency_USD_Exception("Cents must be less than 100, use dollars and cents instead");
+            throw new Currency_USD_Invalid_Value_Exception("Cents must be less than 100, use dollars and cents instead");
         }
         if ($cents < 0) {
-            throw new Currency_USD_Exception("Cents must be greater than 0, set negative values separately");
+            throw new Currency_USD_Invalid_Value_Exception("Cents must be greater than 0, set negative values separately");
         }
     }
 
@@ -515,6 +541,28 @@ class Currency_USD {
     }
 
     /**
+     * Test whether this object is greater than or equal to another Currency_USD object.
+     *
+     * @param Currency_USD $currencyObj The object to which we want to compare.
+     *
+     * @return boolean True if this object is greater than or equal to the other object, otherwise false.
+     */
+    public function isGreaterThanOrEqualTo(Currency_USD $currencyObj) {
+        return ($this->isGreaterThan($currencyObj) or $this->equals($currencyObj));
+    }
+
+    /**
+     * Test whether this object is less than or equal to another Currency_USD object.
+     *
+     * @param Currency_USD $currencyObj The object to which we want to compare.
+     *
+     * @return boolean True if this object is less than or equal to the other object, otherwise false.
+     */
+    public function isLessThanOrEqualTo(Currency_USD $currencyObj) {
+        return ($this->isLessThan($currencyObj) or $this->equals($currencyObj));
+    }
+
+    /**
      * Remove commas and turn the dollar amount into an int.
      *
      * @param string $amountAsString The amount to turn into an int.
@@ -602,4 +650,6 @@ class Currency_USD {
 }
 
 class Currency_USD_Exception extends Exception {
+}
+class Currency_USD_Invalid_Value_Exception extends Exception {
 }
