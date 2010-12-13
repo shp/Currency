@@ -271,7 +271,7 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
         try {
             $currency = Currency_USD::fromFloat($invalidFloat);
             $this->fail("Expected failure because {$invalidFloat} is an invalid float");
-        } catch (Currency_USD_Invalid_Value_Exception $e) {
+        } catch (Currency_USD_Exception $e) {
             // We expected this exception
         }
     }
@@ -281,6 +281,10 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
                     array(123.456),
                     array(123.123),
                     array(123.999),
+                    array(""),
+                    array(123.001),
+                    array(123.50001),
+                    array("123.50001"),
                     array(0.123456),
                     array(999.999),
                     array(999.019),
