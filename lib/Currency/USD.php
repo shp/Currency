@@ -651,5 +651,5 @@ class Currency_USD {
 
 class Currency_USD_Exception extends Exception {
 }
-class Currency_USD_Invalid_Value_Exception extends Exception {
+class Currency_USD_Invalid_Value_Exception extends Currency_USD_Exception {
 }
