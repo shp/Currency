@@ -34,7 +34,6 @@
  */
 
 class Currency_USDTest extends PHPUnit_Framework_TestCase {
-
     /**
      * Test whether we can create a currency object from a string.
      *
@@ -45,11 +44,17 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
      *
      * @dataProvider currencyAsStringDataProvider
      */
-    public function testCanBeCreatedFromString($string, $dollars, $cents, $isNegative) {
-        $currency = Currency_USD::fromString($string);
-        $this->assertEquals($dollars, $currency->getDollars());
-        $this->assertEquals($cents, $currency->getCents());
-        $this->assertEquals($isNegative, $currency->isNegative());
+    public function testCanBeCreatedFromString($string, $dollars, $cents, $isNegative, $expectedException) {
+        try {
+            $currency = Currency_USD::fromString($string);
+            $this->assertFalse($expectedException, "Exception expected, but none thrown");
+
+            $this->assertEquals($dollars, $currency->getDollars());
+            $this->assertEquals($cents, $currency->getCents());
+            $this->assertEquals($isNegative, $currency->isNegative());
+        } catch(Currency_USD_Exception $ex) {
+            $this->assertTrue($expectedException, "Exception thrown, but none expected");
+        }
     }
 
     /**
@@ -63,44 +68,57 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
      */
     public function currencyAsStringDataProvider() {
         return array(
-            //    String            Dollar  Cen IsNegative
-            array('0',              0,          0,  false),
-            array('12',             12,         0,  false),
-            array('.1',             0,          10, false),
-            array('.01',            0,          1,  false),
-            array('.12',            0,          12, false),
-            array('0.12',           0,          12, false),
-            array('1.2',            1,          20, false),
-            array('1.23',           1,          23, false),
-            array('12.34',          12,         34, false),
-            array('123.45',         123,        45, false),
-            array('-0',             0,          0,  true),
-            array('-0.0',           0,          0,  true),
-            array('-0.00',          0,          0,  true),
-            array('-1.23',          1,          23, true),
-            array('-1',             1,          0,  true),
-            array('-1.2',           1,          20, true),
-            array('-12.34',         12,         34, true),
-            array('-123.45',        123,        45, true),
-            array('$-123.45',       123,        45, true),
-            array('-$123.45',       123,        45, true),
-            array('1,234.56',       1234,       56, false),
-            array('12,345.67',      12345,      67, false),
-            array('123,456.78',     123456,     78, false),
-            array('1,234,567.89',   1234567,    89, false),
-            array('12,345,678.90',  12345678,   90, false),
-            array('123,456,789.01', 123456789,  01, false),
+            //    String            Dollar  Cen IsNegative expException
+            array('0',              0,          0,  false, false),
+            array('12',             12,         0,  false, false),
+            array('.1',             0,          10, false, false),
+            array('.01',            0,          1,  false, false),
+            array('.12',            0,          12, false, false),
+            array('0.12',           0,          12, false, false),
+            array('1.2',            1,          20, false, false),
+            array('1.23',           1,          23, false, false),
+            array('12.34',          12,         34, false, false),
+            array('123.45',         123,        45, false, false),
+            array('-0',             0,          0,  true,  false),
+            array('-0.0',           0,          0,  true,  false),
+            array('-0.00',          0,          0,  true,  false),
+            array('-1.23',          1,          23, true,  false),
+            array('-1',             1,          0,  true,  false),
+            array('-1.2',           1,          20, true,  false),
+            array('-12.34',         12,         34, true,  false),
+            array('-123.45',        123,        45, true,  false),
+            array('$-123.45',       123,        45, true,  false),
+            array('-$123.45',       123,        45, true,  false),
+            array('1,234.56',       1234,       56, false, false),
+            array('12,345.67',      12345,      67, false, false),
+            array('123,456.78',     123456,     78, false, false),
+            array('1,234,567.89',   1234567,    89, false, false),
+            array('12,345,678.90',  12345678,   90, false, false),
+            array('123,456,789.01', 123456789,  01, false, false),
+
+            //exception cases: (TODO add more)
+            array(null,             null,     null, null,  true),
+            array(array(),          null,     null, null,  true),
+            array(123.45,           null,     null, null,  true),
+            array(123,              null,     null, null,  true),
+            //array('',               null,     null, null,  true), - In the future, empty string should probably be an exception
         );
     }
 
     /**
      * @dataProvider currencyAsIntDataProvider
      */
-    public function testCanBeCreatedFromInt($int, $dollars, $cents, $isNegative) {
-        $currency = Currency_USD::fromInt($int);
-        $this->assertEquals($dollars,       $currency->getDollars());
-        $this->assertEquals($cents,         $currency->getCents());
-        $this->assertEquals($isNegative,    $currency->isNegative());
+    public function testCanBeCreatedFromInt($int, $dollars, $cents, $isNegative, $expectedException) {
+        try {
+            $currency = Currency_USD::fromInt($int);
+            $this->assertFalse($expectedException, "Exception expected, but none thrown");
+
+            $this->assertEquals($dollars, $currency->getDollars());
+            $this->assertEquals($cents, $currency->getCents());
+            $this->assertEquals($isNegative, $currency->isNegative());
+        } catch(Currency_USD_Exception $ex) {
+            $this->assertTrue($expectedException, "Exception thrown, but none expected");
+        }
     }
 
     /**
@@ -113,15 +131,23 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
      */
     public function currencyAsIntDataProvider() {
         return array(
-            //    Int           Dollar  Cen IsNegative
-            array(0,            0,      0,  false),
-            array(-0,           0,      0,  false),
-            array(1,            1,      0,  false),
-            array(10,           10,     0,  false),
-            array(100,          100,    0,  false),
-            array(-1,           1,      0,  true),
-            array(-10,          10,     0,  true),
-            array(-100,         100,    0,  true),
+            //    Int         Dollar  Cen IsNegative expException
+            array(0,            0,      0,  false,  false),
+            array(-0,           0,      0,  false,  false),
+            array(1,            1,      0,  false,  false),
+            array(10,           10,     0,  false,  false),
+            array(100,          100,    0,  false,  false),
+            array(-1,           1,      0,  true,   false),
+            array(-10,          10,     0,  true,   false),
+            array(-100,         100,    0,  true,   false),
+
+            //exception cases:
+            array(null,         null, null, null,   true),
+            array(4.19,         null, null, null,   true),
+            array('4.19',       null, null, null,   true),
+            array('4',          null, null, null,   true),
+            array('0',          null, null, null,   true),
+            array(array(),      null, null, null,   true),
         );
     }
 
@@ -171,6 +197,7 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
             array(  999999, false,              null),
             array(  -1,     true,               "dollars must be positive"),
             array(  0.5,    true,               "dollars must be an integer"),
+            array(  null,   true,               "dollars cannot be null"),
         );
     }
 
@@ -197,6 +224,7 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
             array(  -1,     true,               "cents must be positive"),
             array(  0.5,    true,               "cents must be an integer"),
             array(  100,    true,               "cents must be less than 100"),
+            array(  null,   true,               "cents cannot be null"),
         );
     }
 
@@ -228,11 +256,17 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
     /**
      * @dataProvider currencyAsFloatDataProvider
      */
-    public function testCanBeCreatedFromFloat($float, $dollars, $cents, $isNegative) {
-        $currency = Currency_USD::fromFloat($float);
-        $this->assertEquals($dollars,       $currency->getDollars());
-        $this->assertEquals($cents,         $currency->getCents());
-        $this->assertEquals($isNegative,    $currency->isNegative());
+    public function testCanBeCreatedFromFloat($float, $dollars, $cents, $isNegative, $expectedException) {
+        try {
+            $currency = Currency_USD::fromFloat($float);
+            $this->assertFalse($expectedException, "Exception expected, but none thrown");
+
+            $this->assertEquals($dollars, $currency->getDollars());
+            $this->assertEquals($cents, $currency->getCents());
+            $this->assertEquals($isNegative, $currency->isNegative());
+        } catch(Currency_USD_Exception $ex) {
+            $this->assertTrue($expectedException, "Exception thrown, but none expected");
+        }
     }
 
     /**
@@ -245,22 +279,29 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
      */
     public function currencyAsFloatDataProvider() {
         return array(
-            //    Float         Dollar  Cen IsNegative
-            array(0.0,          0,      0,  false),
-            array(0.5,          0,      50, false),
-            array(0.50,         0,      50, false),
-            array(1.0,          1,      0,  false),
-            array(10.0,         10,     0,  false),
-            array(100.0,        100,    0,  false),
-            array(123.45,       123,    45, false),
-            array(123.4,        123,    40, false),
-            array(-0.0,         0,      0,  false),
-            array(-0.5,         0,      50, true),
-            array(-0.50,        0,      50, true),
-            array(-1.0,         1,      0,  true),
-            array(-10.0,        10,     0,  true),
-            array(-100.0,       100,    0,  true),
-            array(-123.45,      123,    45, true),
+            //    Float         Dollar  Cen IsNeg  expException
+            array(0.0,          0,      0,  false, false),
+            array(0.5,          0,      50, false, false),
+            array(0.50,         0,      50, false, false),
+            array(1.0,          1,      0,  false, false),
+            array(10.0,         10,     0,  false, false),
+            array(100.0,        100,    0,  false, false),
+            array(123.45,       123,    45, false, false),
+            array(123.4,        123,    40, false, false),
+            array(-0.0,         0,      0,  false, false),
+            array(-0.5,         0,      50, true,  false),
+            array(-0.50,        0,      50, true,  false),
+            array(-1.0,         1,      0,  true,  false),
+            array(-10.0,        10,     0,  true,  false),
+            array(-100.0,       100,    0,  true,  false),
+            array(-123.45,      123,    45, true,  false),
+
+            //exception cases:
+            array('string',     null, null, null,  true),
+            array(null,         null, null, null,  true),
+            array('0',          null, null, null,  true),
+            array('3.05',       null, null, null,  true),
+            array(array(),      null, null, null,  true),
         );
     }
 
