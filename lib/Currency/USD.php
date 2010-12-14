@@ -73,12 +73,12 @@ class Currency_USD {
      * @param integer $intVal The integer you want to tunr into a Currency_USD object.
      *
      * @throws Currency_USD_Exception If input value is not an integer.
-     * @throws Currency_USD_Null_Value_Exception If input value is null.
+     * @throws Currency_USD_Invalid_Value_Exception If input value is null.
      * @return Currency_USD The value of intVal as a Currency_USD object.
      */
     public static function fromInt($intVal) {
         if ($intVal === null) {
-            throw new Currency_USD_Null_Value_Exception("\$intVal cannot be null.");
+            throw new Currency_USD_Invalid_Value_Exception("\$intVal cannot be null.");
         }
         if (!is_int($intVal)) {
             throw new Currency_USD_Exception("\$intVal is not an int");
@@ -102,10 +102,10 @@ class Currency_USD {
      */
     public static function fromDollarsAndCents($dollars, $cents, $isNegative = false) {
         if ($dollars === null) {
-            throw new Currency_USD_Null_Value_Exception("\$dollars cannot be null.");
+            throw new Currency_USD_Invalid_Value_Exception("\$dollars cannot be null.");
         }
         if ($cents === null) {
-            throw new Currency_USD_Null_Value_Exception("\$cents cannot be null.");
+            throw new Currency_USD_Invalid_Value_Exception("\$cents cannot be null.");
         }
         $currencyObj = new Currency_USD();
         $currencyObj->setDollars($dollars);
@@ -149,7 +149,7 @@ class Currency_USD {
      */
     public static function fromNumCents($numCents) {
         if ($numCents === null) {
-            throw new Currency_USD_Null_Value_Exception("\$numCents cannot be null.");
+            throw new Currency_USD_Invalid_Value_Exception("\$numCents cannot be null.");
         }
         $positiveNumCents = abs($numCents);
 
