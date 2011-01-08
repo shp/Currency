@@ -101,7 +101,7 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
             array(array(),          null,     null, null,  true),
             array(123.45,           null,     null, null,  true),
             array(123,              null,     null, null,  true),
-            //array('',               null,     null, null,  true), - In the future, empty string should probably be an exception
+            array('',               null,     null, null,  true),
         );
     }
 

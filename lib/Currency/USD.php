@@ -53,6 +53,10 @@ class Currency_USD {
         if (!is_string($strVal)) {
             throw new Currency_USD_Invalid_Value_Exception("\$strVal is not a string");
         }
+        if ($strVal === "") {
+            throw new Currency_USD_Invalid_Value_Exception("\$strVal cannot be empty-string.");
+        }
+
         $regex   = "/^[\$]?(\-?)[\$]?([\d,]*)\.?([\d]{0,2})$/";
         $matches = array();
         $result  = preg_match($regex, $strVal, $matches);
