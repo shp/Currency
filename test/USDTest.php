@@ -657,4 +657,73 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
             array(-158.70,      "-158.70"),
         );
     }
+
+    public function getPercentDataProvider() {
+        return array(
+            //      FloatA  FloatB  numDigits   ExpectedValue ExpectedExeception
+
+            // Good tests
+            array(  0.00,   100.00,     0,      0.0,        false),
+            array(  5.00,   100.00,     0,      5.0,        false),
+            array( 10.00,  1000.00,     0,      1.0,        false),
+            array( 10.00,    30.00,     0,      33.0,       false),
+            array( 10.00,    30.00,     0,      33.0,       false),
+            array( 10.00,    30.00,     1,      33.3,       false),
+            array( 10.00,    30.00,     2,      33.33,      false),
+            array( 10.00,    30.00,     null,   33.33,      false),
+            array( 10.00,    30.00,     3,      33.333,     false),
+
+            // Negative
+            array(  5.00,  -100.00,     0,      -5.0,        false),
+            array( -5.00,   100.00,     0,      -5.0,        false),
+
+            // Test rounding
+            array( 99.99,   100.00,     0,      100.0,      false),
+            array( 99.99,   100.00,     1,      100.0,      false),
+            array( 99.99,   100.00,     null,   99.99,      false),
+            array( 20.00,    30.00,     2,      66.67,      false),
+            array( 20.00,    30.00,     3,      66.667,     false),
+
+            // Bad numDigits
+            array( 10.00,    30.00,     4,      null,       true),
+            array( 10.00,    30.00,     '2',    null,       true),
+            array( 10.00,    30.00,     2.00,   null,       true),
+            array( 10.00,    30.00,     true,   null,       true),
+            array( 10.00,    30.00,     '',     null,       true),
+            array( 10.00,    30.00,     -1,     null,       true),
+        );
+    }
+
+    /**
+     * @dataProvider getPercentDataProvider
+     */
+    public function testGetPercentWorksCorrectly($a, $b, $numDecimals, $expectedValue, $expectedException) {
+        $currencyObjA = Currency_USD::fromFloat($a);
+        $currencyObjB = Currency_USD::fromFloat($b);
+        try {
+            if ($numDecimals === null) {
+                $actualValue  = Currency_USD::getPercent($currencyObjA, $currencyObjB);
+            } else {
+                $actualValue  = Currency_USD::getPercent($currencyObjA, $currencyObjB, $numDecimals);
+            }
+            $this->assertTrue($actualValue === $expectedValue);
+            if ($expectedException === true) {
+                $this->fail("Expected Exception did not happen");
+            }
+        } catch (Currency_USD_Exception $e) {
+            if ($expectedException !== true) {
+                $this->fail("Unexpected Exception");
+            }
+        }
+    }
+
+    public function testGetPercentThrowsExceptionOnZero() {
+        $currencyObjA = Currency_USD::fromFloat(10.00);
+        $currencyObjB = Currency_USD::fromFloat(0.00);
+        try {
+            $actualValue  = Currency_USD::getPercent($currencyObjA, $currencyObjB);
+            $this->fail("Didn't throw expected Currency_USD_Divide_By_Zero_Exception");
+        } catch (Currency_USD_Divide_By_Zero_Exception $e) {
+        }
+    }
 }

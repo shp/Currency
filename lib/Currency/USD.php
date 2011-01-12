@@ -567,6 +567,29 @@ class Currency_USD {
     }
 
     /**
+     * Calculate a percentage that one currency object is of another
+     *
+     * @param Currency_USD $a The numerator Currency_USD object.
+     * @param Currency_USD $b The denominator Currency_USD object.
+     * @param integer $numDecimals The number of decimal places to round to. Valid values are 0-3 inclusive and default is 2.
+     *
+     * @throws Currency_USD_Exception If numDecimals is invalid or out of range.
+     * @throws Currency_USD_Divide_By_Zero_Exception If $b equals 0
+     * @return float the % that a is of b, rounded to numDecimals decimal places
+     */
+    public static function getPercent(Currency_USD $a, Currency_USD $b, $numDecimals = 2) {
+        if ( (intVal($numDecimals) !== $numDecimals) || $numDecimals < 0 || $numDecimals > 3 ) {
+            throw new Currency_USD_Exception("Invalid numDecimals");
+        }
+
+        if ($b->toNumCents() === 0) {
+            throw new Currency_USD_Divide_By_Zero_Exception("Can't divide by 0");
+        }
+
+        return round(100 * $a->toNumCents() / $b->toNumCents(), $numDecimals);
+    }
+
+    /**
      * Remove commas and turn the dollar amount into an int.
      *
      * @param string $amountAsString The amount to turn into an int.
@@ -654,6 +677,8 @@ class Currency_USD {
 }
 
 class Currency_USD_Exception extends Exception {
+}
+class Currency_USD_Divide_By_Zero_Exception extends Exception {
 }
 class Currency_USD_Invalid_Value_Exception extends Currency_USD_Exception {
 }
