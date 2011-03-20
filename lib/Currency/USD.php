@@ -202,11 +202,19 @@ class Currency_USD {
      * @throws Currency_USD_Exception If includeDollarSign is not boolean.
      * @return string A string representation of this object.
      */
-    public function formattedString($includeDollarSign = false) {
+    public function formattedString($includeDollarSign = false, $includeCommaForThousands = false) {
         if ($includeDollarSign !== true && $includeDollarSign !== false) {
             throw new Currency_USD_Exception('Please specify true or false for $includeDollarSign');
         }
+        if ($includeCommaForThousands !== true && $includeCommaForThousands !== false) {
+            throw new Currency_USD_Exception('Please specify true or false for $includeCommaForThousands');
+        }
 
+        if ($includeCommaForThousands) {
+            $dollars = $this->_getDollarsWithCommas();
+        } else {
+            $dollars = $this->getDollars();
+        }
         $dollarSign = '';
         if ($includeDollarSign) {
             $dollarSign = '$';
@@ -215,7 +223,33 @@ class Currency_USD {
         if ($this->isNegative()) {
             $negativeSign = '-';
         }
-        return "{$dollarSign}{$negativeSign}{$this->getDollars()}.{$this->_getTwoDigitNumCents()}";
+        return "{$dollarSign}{$negativeSign}{$dollars}.{$this->_getTwoDigitNumCents()}";
+    }
+
+    /**
+     * Adds commas to dollar amounts where necessary.
+     *
+     * @return string A string representation of the dollars of this object with commas added when thousands and higher occur.
+     */
+    public function _getDollarsWithCommas() {
+        if ($this->getDollars() < 1000) {
+            return $this->getDollars();
+        }
+        $arrayOfDollars = array();
+        $dollars = $this->getDollars();
+        while ($dollars != $dollars % 1000) {
+            $arrayOfDollars[] = $dollars % 1000;
+            $dollars = floor($dollars / 1000);
+        }
+        $arrayOfDollars[] = $dollars;
+        $dollarsString = $arrayOfDollars[0];
+        $index = 1;
+        while ($arrayOfDollars[count($arrayOfDollars) - 1] !== $arrayOfDollars[$index]) {
+            $dollarsString = $arrayOfDollars[$index] . "," . $dollarsString;
+            $index++;
+        }
+        $dollarsString = $arrayOfDollars[$index] . "," . $dollarsString;
+        return $dollarsString;
     }
 
     /**
@@ -224,7 +258,7 @@ class Currency_USD {
      * @return string A string representation of this object.
      */
     public function __toString() {
-        return $this->formattedString(false);
+        return $this->formattedString(false, false);
     }
 
     /**
