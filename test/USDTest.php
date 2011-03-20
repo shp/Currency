@@ -641,8 +641,12 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
      */
     public function testFormattedStringFormatsCurrencyCorrectly($amountAsFloat, $amountAsString) {
         $currencyObj = Currency_USD::fromFloat($amountAsFloat);
-        $this->assertEquals("{$amountAsString}", $currencyObj->formattedString(false));
-        $this->assertEquals("\${$amountAsString}", $currencyObj->formattedString(true));
+        $this->assertEquals("{$amountAsString}", $currencyObj->formattedString(false, false));
+        $this->assertEquals("\${$amountAsString}", $currencyObj->formattedString(true, false));
+    }
+
+    public function testFormattedStringFormatsWithCommasCorrectlyWhenNeeded() {
+        $this->markTestIncomplete();
     }
 
     public function formattedStringDataProvider() {
