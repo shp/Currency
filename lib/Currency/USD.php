@@ -245,10 +245,12 @@ class Currency_USD {
         $dollarsString = $arrayOfDollars[0];
         $index = 1;
         while ($arrayOfDollars[count($arrayOfDollars) - 1] !== $arrayOfDollars[$index]) {
-            $dollarsString = $arrayOfDollars[$index] . "," . $dollarsString;
+            // the sprintf call ensures that a value with leading zeroes is properly represented.
+            $dollarsString = $arrayOfDollars[$index] . "," . sprintf("%03s", $dollarsString);
             $index++;
         }
-        $dollarsString = $arrayOfDollars[$index] . "," . $dollarsString;
+        $dollarsString = $arrayOfDollars[$index] . "," . sprintf("%03s", $dollarsString);
+
         return $dollarsString;
     }
 
