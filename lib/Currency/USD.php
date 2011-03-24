@@ -227,6 +227,13 @@ class Currency_USD {
     }
 
     /**
+     * Returns the currency object as a string with commas and a dollar sign.
+     */
+    public function getFormattedString() {
+        return $this->formattedString(true, true);
+    }
+
+    /**
      * Adds commas to dollar amounts where necessary.
      *
      * @return string A string representation of the dollars of this object with commas added when thousands and higher occur.
