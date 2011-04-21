@@ -4,6 +4,7 @@ class Currency_USD_Precise {
 
     private $_dollars                   = 0;
     private $_cents                     = 0;
+    private $_partialCents              = 0;
     private $_isNegative                = false;
 
     /**
@@ -26,18 +27,19 @@ class Currency_USD_Precise {
             throw new Currency_USD_Precise_Invalid_Value_Exception("\$strVal cannot be empty-string.");
         }
 
-        $regex   = "/^[\$]?(\-?)[\$]?([\d,]*)\.?([\d]{0,4})$/";
+        $regex   = "/^[\$]?(\-?)[\$]?([\d,]*)\.?([\d]{0,2})?([\d]{0,4})$/";
         $matches = array();
         $result  = preg_match($regex, $strVal, $matches);
 
         if ($result == 0) {
             throw new Currency_USD_Precise_Exception("Unable to parse string '{$strVal}' as currency");
         }
-        $dollars    = (isset($matches[2]) ? self::_cleanDollarAmount($matches[2]) : 0);
-        $cents      = (isset($matches[3]) ? self::_parseCentsFromString($matches[3]) : 0);
-        $isNegative = (isset($matches[1]) && $matches[1] == '-');
+        $dollars        = (isset($matches[2]) ? self::_cleanDollarAmount($matches[2]) : 0);
+        $cents          = (isset($matches[3]) ? self::_parseCentsFromString($matches[3]) : 0);
+        $partialCents   = (isset($matches[4]) ? self::_parsePartialCentsFromString($matches[4]) : 0);
+        $isNegative     = (isset($matches[1]) && $matches[1] == '-');
 
-        return self::fromDollarsAndCents($dollars, $cents, $isNegative);
+        return self::fromDollarsCentsAndPartialCents($dollars, $cents, $partialCents, $isNegative);
     }
 
     /**
@@ -73,16 +75,20 @@ class Currency_USD_Precise {
      * @throws Currency_USD_Precise_Exception If isNegative is non-boolean.
      * @return Currency_USD_Precise The Currency_USD_Precise object.
      */
-    public static function fromDollarsAndCents($dollars, $cents, $isNegative = false) {
+    public static function fromDollarsCentsAndPartialCents($dollars, $cents, $partialCents, $isNegative = false) {
         if ($dollars === null) {
             throw new Currency_USD_Invalid_Value_Exception("\$dollars cannot be null.");
         }
         if ($cents === null) {
             throw new Currency_USD_Invalid_Value_Exception("\$cents cannot be null.");
         }
+        if ($partialCents === null) {
+            throw new Currency_USD_Invalid_Value_Exception("\$cents cannot be null.");
+        }
         $currencyObj = new Currency_USD_Precise();
         $currencyObj->setDollars($dollars);
         $currencyObj->setCents($cents);
+        $currencyObj->setPartialCents($partialCents);
         $currencyObj->setIsNegative($isNegative);
         return $currencyObj;
     }
@@ -120,21 +126,22 @@ class Currency_USD_Precise {
      * @throws Currency_USD_Precise_Exception If numCents is greater than PHP_INT_MAX.
      * @return Currency_USD_Precise The Currency_USD_Precise object.
      */
-    public static function fromNumCents($numCents) {
-        if ($numCents === null) {
-            throw new Currency_USD_Precise_Invalid_Value_Exception("\$numCents cannot be null.");
+    public static function fromNumPartialCents($numPartialCents) {
+        if ($numPartialCents === null) {
+            throw new Currency_USD_Precise_Invalid_Value_Exception("\$numPartialCents cannot be null.");
         }
-        $positiveNumCents = abs($numCents);
+        $positiveNumCents = abs($numPartialCents);
 
         if ($positiveNumCents > PHP_INT_MAX) {
             $message = "Overflow, {$numCents} is greater than PHP_INT_MAX: " . PHP_INT_MAX;
             throw new Currency_USD_Precise_Exception($message);
         }
 
-        $dollars    = intVal(floor($positiveNumCents / 100));
-        $cents      = $positiveNumCents % 100;
-        $isNegative = ($numCents < 0);
-        return self::fromDollarsAndCents($dollars, $cents, $isNegative);
+        $dollars        = intVal(floor($positiveNumCents / 10000));
+        $cents          = intVal(floor($positiveNumCents / 100));
+        $partialCents   = $positiveNumCents % 100;
+        $isNegative     = ($numCents < 0);
+        return self::fromDollarsCentsAndPartialCents($dollars, $cents, $partialCents, $isNegative);
     }
 
     /**
@@ -143,7 +150,7 @@ class Currency_USD_Precise {
      * @return float The value of this object as a float.
      */
     public function toDecimal() {
-        $value = $this->getDollars() + $this->getCents() / 100;
+        $value = $this->getDollars() + $this->getCents() / 100 + $this->getPartialCents() / 10000;
         if ($this->isNegative()) {
             $value *= -1;
         }
@@ -151,12 +158,12 @@ class Currency_USD_Precise {
     }
 
     /**
-     * This object represented as an integer number of cents.
+     * This object represented as an integer number of partial cents.
      *
-     * @return integer The number of cents.
+     * @return integer The number of partial cents.
      */
-    public function toNumCents() {
-        $value = $this->getDollars() * 100 + $this->getCents();
+    public function toNumPartialCents() {
+        $value = $this->getDollars() * 10000 + $this->getCents() * 100 + $this->getPartialCents();
         if ($this->isNegative()) {
             $value *= -1;
         }
@@ -171,11 +178,11 @@ class Currency_USD_Precise {
      * @return Currency_USD_Precise The sum of the two objects as a Currency_USD object.
      */
     public function add(Currency_USD $currencyObj) {
-        $numCents1 = $this->toNumCents();
-        $numCents2 = $currencyObj->toNumCents();
+        $numCents1 = $this->toNumPartialCents();
+        $numCents2 = $currencyObj->toNumPartialCents();
 
         $sum      = $numCents1 + $numCents2;
-        $currency = self::fromNumCents($sum);
+        $currency = self::fromNumPartialCents($sum);
         return $currency;
     }
 
@@ -187,10 +194,10 @@ class Currency_USD_Precise {
      * @return Currency_USD_Precise The difference of the two Currency_USD objects as a Currency_USD object.
      */
     public function subtract(Currency_USD_Precise $currencyObj) {
-        $numCents1 = $this->toNumCents();
-        $numCents2 = $currencyObj->toNumCents();
+        $numPartialCents1 = $this->toNumPartialCents();
+        $numPartialCents2 = $currencyObj->toNumPartialCents();
 
-        $currency = self::fromNumCents($numCents1 - $numCents2);
+        $currency = self::fromNumPartialCents($numPartialCents1 - $numPartialCents2);
         return $currency;
     }
 
@@ -208,7 +215,7 @@ class Currency_USD_Precise {
      * @return Currency_USD_Precise The product as a Currency_USD_Precise object.
      */
     public function multiply($scalar, $whatToDoWithPartialCents = self::PARTIAL_CENTS_THROW_EXCEPTION) {
-        $numCents = $this->toNumCents();
+        $numCents = $this->toNumPartialCents();
         $product  = $numCents * $scalar;
 
         if (is_float($product) && $whatToDoWithPartialCents == self::PARTIAL_CENTS_THROW_EXCEPTION) {
@@ -227,7 +234,7 @@ class Currency_USD_Precise {
             $product = round($product);
         }
 
-        return self::fromNumCents($product);
+        return self::fromNumPartialCents($product);
     }
 
     /**
@@ -298,8 +305,8 @@ class Currency_USD_Precise {
         if (!is_int($cents)) {
             throw new Currency_USD_Precise_Invalid_Value_Exception("Cents must be an int");
         }
-        if ($cents >= 100) {
-            throw new Currency_USD_Precise_Invalid_Value_Exception("Cents must be less than 100, use dollars and cents instead");
+        if ($cents >= 10000) {
+            throw new Currency_USD_Precise_Invalid_Value_Exception("Cents must be less than 10000, use dollars and cents instead");
         }
         if ($cents < 0) {
             throw new Currency_USD_Precise_Invalid_Value_Exception("Cents must be greater than 0, set negative values separately");
@@ -352,6 +359,28 @@ class Currency_USD_Precise {
      *
      * @return integer Number of cents, not including dollars, so $1.50 would return int(50).
      */
+    public function getPartialCents() {
+        return $this->_partialCents;
+    }
+
+    /**
+     * Modifier for cents. Only modifies cents, does not affect dollars.
+     *
+     * @param integer $value Number of cents, must be integer between 0 and 9999.
+     *
+     * @return void
+     */
+    public function setPartialCents($value) {
+        $this->validatePartialCents($value);
+        $this->_partialCents = $value;
+    }
+
+
+    /**
+     * Accessor for cents.
+     *
+     * @return integer Number of cents, not including dollars, so $1.50 would return int(50).
+     */
     public function getCents() {
         return $this->_cents;
     }
@@ -359,7 +388,7 @@ class Currency_USD_Precise {
     /**
      * Modifier for cents. Only modifies cents, does not affect dollars.
      *
-     * @param integer $value Number of cents, must be integer between 0 and 99.
+     * @param integer $value Number of cents, must be integer between 0 and 9999.
      *
      * @return void
      */
@@ -502,10 +531,10 @@ class Currency_USD_Precise {
      *
      * @throws Currency_USD_Precise_Exception If numDecimals is invalid or out of range.
      * @throws Currency_USD_Precise_Divide_By_Zero_Exception If $b equals 0
-     * @return float the % that a is of b, rounded to numDecimals decimal places
+     * @return float the % that a is of b, rounded to numDecimals decimal places TODO: fix this
      */
-    public static function getPercent(Currency_USD_Precise $a, Currency_USD_Precise $b, $numDecimals = 4) {
-        if ( (intVal($numDecimals) !== $numDecimals) || $numDecimals < 0 || $numDecimals > 5 ) {
+    public static function getPercent(Currency_USD_Precise $a, Currency_USD_Precise $b, $numDecimals = 2) {
+        if ( (intVal($numDecimals) !== $numDecimals) || $numDecimals < 0 || $numDecimals > 3 ) {
             throw new Currency_USD_Precise_Exception("Invalid numDecimals");
         }
 
@@ -530,6 +559,35 @@ class Currency_USD_Precise {
     }
 
     /**
+     * Parse the number of partial cents from a string.
+     *
+     * @param string $partialCentsStr The string with partial cents in it.
+     *
+     * @throws Currency_USD_Precise_Exception If we were unable to parse partial cents from the string.
+     * @return integer The integer value of the partial cents part of the string.
+     */
+    private static function _parsePartialCentsFromString($partialCentsStr) {
+        if ($partialCentsStr === null) {
+            return 0;
+        }
+
+        if ($partialCentsStr == '') {
+            return 0;
+        }
+
+        if (strlen($partialCentsStr) == 2) {
+            return intVal($centsStr);
+        }
+
+        // centsStr has 1 digit (e.g. '123.4', which should be translated to 40 cents
+        if (strlen($partialCentsStr) == 1) {
+            return (intVal($partialCentsStr) * 10);
+        }
+
+        throw new Currency_USD_Precise_Exception("Unable to parse cents: " . var_export($partialCentsStr, true));
+    }
+
+    /**
      * Parse the number of cents from a string.
      *
      * @param string $centsStr The string with cents in it.
@@ -546,11 +604,10 @@ class Currency_USD_Precise {
             return 0;
         }
 
-        if (strlen($centsStr) == 4) {
+        if (strlen($centsStr) == 2) {
             return intVal($centsStr);
         }
 
-        // TODO: Adapt this to 4 digit maximums.
         // centsStr has 1 digit (e.g. '123.4', which should be translated to 40 cents
         if (strlen($centsStr) == 1) {
             return (intVal($centsStr) * 10);
@@ -559,7 +616,6 @@ class Currency_USD_Precise {
         throw new Currency_USD_Precise_Exception("Unable to parse cents: " . var_export($centsStr, true));
     }
 
-    // TODO: Adapt to 4 decimal precision schema.
     /**
      * Get a two-digit string representation of the number of cents.
      *
@@ -570,6 +626,18 @@ class Currency_USD_Precise {
             return "0{$this->getCents()}";
         }
         return "{$this->getCents()}";
+    }
+
+    /**
+     * Get a two-digit string representation of the number of partial cents.
+     *
+     * @return string The two-digit string representation.
+     */
+    private function _getTwoDigitNumPartialCents() {
+        if ($this->getPartialCents() < 10) {
+            return "0{$this->getPartialCents()}";
+        }
+        return "{$this->getPartialCents()}";
     }
 
 
@@ -584,7 +652,7 @@ class Currency_USD_Precise {
      * @deprecated only valid in parent class
      */
     private function _composeSpokenAmount() {
-        $message = "\nSpoken amounts are not available on Precise Currency objects.  Use currencyObject->losePrecision()->_composeSpokenAmount().\n"
+        $message = "\nPrecise currency not valid for _composeSpokenAmount.  Call like object->roundPrecision()->_composeSpokenAmount()\n";
         throw new Currency_USD_Precise_Deprecated_Exception($message);
     }
 
@@ -594,7 +662,7 @@ class Currency_USD_Precise {
      * @deprecated only valid in parent class
      */
     public function __toString() {
-        $message = "\nPrecise currency not valid for __toString.  Convert to non-precise currency object first.\n";
+        $message = "\nPrecise currency not valid for __toString.  Call like object->roundPrecision()->__toString()\n";
         throw new Currency_USD_Precise_Deprecated_Exception($message);
     }
 
@@ -604,6 +672,7 @@ class Currency_USD_Precise {
      * @deprecated only valid in parent class
      */
     public function toWords() {
+        $message = "\nPrecise currency not valid for toWords.  Call like object->roundPrecision()->toWords()\n";
         throw new Currency_USD_Precise_Deprecated_Exception();
     }
 
@@ -615,6 +684,7 @@ class Currency_USD_Precise {
      * @deprecated only valid in parent class
      */
     public function formattedString($includeDollarSign = null, $includeCommaForThousands = null) {
+        $message = "\nPrecise currency not valid for formattedString.  Call like object->roundPrecision()->formattedString()\n";
         throw new Currency_USD_Precise_Deprecated_Exception();
     }
 
@@ -624,6 +694,7 @@ class Currency_USD_Precise {
      * @deprecated only valid in parent class
      */
     public function getFormattedString() {
+        $message = "\nPrecise currency not valid for getFormattedString.  Call like object->roundPrecision()->getFormattedString()\n";
         throw new Currency_USD_Precise_Deprecated_Exception();
     }
 
@@ -633,6 +704,7 @@ class Currency_USD_Precise {
      * @deprecated only valid in parent class
      */
     public function _getDollarsWithCommas() {
+        $message = "\nPrecise currency not valid for _getDollarsWithCommas.  Call like object->roundPrecision()->_getDollarsWithCommas()\n";
         throw new Currency_USD_Precise_Deprecated_Exception();
     }
 
