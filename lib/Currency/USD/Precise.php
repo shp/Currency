@@ -531,7 +531,7 @@ class Currency_USD_Precise {
      *
      * @throws Currency_USD_Precise_Exception If numDecimals is invalid or out of range.
      * @throws Currency_USD_Precise_Divide_By_Zero_Exception If $b equals 0
-     * @return float the % that a is of b, rounded to numDecimals decimal places TODO: fix this
+     * @return float the % that a is of b, rounded to numDecimals decimal places
      */
     public static function getPercent(Currency_USD_Precise $a, Currency_USD_Precise $b, $numDecimals = 2) {
         if ( (intVal($numDecimals) !== $numDecimals) || $numDecimals < 0 || $numDecimals > 3 ) {
@@ -542,7 +542,7 @@ class Currency_USD_Precise {
             throw new Currency_USD_Precise_Divide_By_Zero_Exception("Can't divide by 0");
         }
 
-        return round(100 * $a->toNumCents() / $b->toNumCents(), $numDecimals);
+        return round(100 * $a->toNumPartialCents() / $b->toNumPartialCents(), $numDecimals);
     }
 
     /**
