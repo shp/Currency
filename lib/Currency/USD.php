@@ -542,7 +542,7 @@ class Currency_USD {
 
         // Return -1 if a is less than b
         if ($a->isLessThan($b)) {
-            return 1;
+            return -1;
         }
 
         // Return  0 if a is equal to b
