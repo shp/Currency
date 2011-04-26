@@ -151,7 +151,7 @@ class Currency_USD_Precise extends Currency_USD{
      * @return float The value of this object as a float.
      */
     public function toDecimal() {
-        $value = $this->getDollars() + $this->getCents() / 100 + $this->getPartialCents() / 10000;
+        $value = $this->getDollars() + ($this->getCents() / 100) + ($this->getPartialCents() / 10000);
         if ($this->isNegative()) {
             $value *= -1;
         }
