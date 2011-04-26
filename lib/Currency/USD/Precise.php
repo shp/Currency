@@ -1,6 +1,6 @@
 <?php
 
-class Currency_USD_Precise {
+class Currency_USD_Precise extends Currency_USD{
 
     private $_dollars                   = 0;
     private $_cents                     = 0;
@@ -138,7 +138,8 @@ class Currency_USD_Precise {
         }
 
         $dollars        = intVal(floor($positiveNumCents / 10000));
-        $cents          = intVal(floor($positiveNumCents / 100));
+        // $positiveNumCents % 10000 clears out anything that would qualify as a dollar amount.
+        $cents          = intVal(floor(($positiveNumCents % 10000) / 100));
         $partialCents   = $positiveNumCents % 100;
         $isNegative     = ($numCents < 0);
         return self::fromDollarsCentsAndPartialCents($dollars, $cents, $partialCents, $isNegative);
@@ -305,11 +306,31 @@ class Currency_USD_Precise {
         if (!is_int($cents)) {
             throw new Currency_USD_Precise_Invalid_Value_Exception("Cents must be an int");
         }
-        if ($cents >= 10000) {
-            throw new Currency_USD_Precise_Invalid_Value_Exception("Cents must be less than 10000, use dollars and cents instead");
+        if ($cents >= 100) {
+            throw new Currency_USD_Precise_Invalid_Value_Exception("Cents must be less than 100, use dollars and cents instead");
         }
         if ($cents < 0) {
             throw new Currency_USD_Precise_Invalid_Value_Exception("Cents must be greater than 0, set negative values separately");
+        }
+    }
+
+    /**
+     * Validate a partialCents amount.
+     *
+     * @param integer $cents The integer number of cents.
+     *
+     * @throws Currency_USD_Precise_Exception If partialCents is non-int, negative, or greater than or equal to 100.
+     * @return void
+     */
+    public function validatePartialCents($partialCents) {
+        if (!is_int($partialCents)) {
+            throw new Currency_USD_Precise_Invalid_Value_Exception("Partial cents must be an int");
+        }
+        if ($partialCents >= 100) {
+            throw new Currency_USD_Precise_Invalid_Value_Exception("Partial cents must be less than 100, use cents and partialCents instead");
+        }
+        if ($partialCents < 0) {
+            throw new Currency_USD_Precise_Invalid_Value_Exception("Partial cents must be greater than 0, set negative values separately");
         }
     }
 
