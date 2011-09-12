@@ -327,6 +327,11 @@ class Currency_USD {
         $numCents = $this->toNumCents();
         $product  = $numCents * $scalar;
 
+        if (is_float($product) && $product == intval($product)) {
+            // If it's a float, but lies on int boundaries, then just make it an int
+            $product = intval($product);
+        }
+
         if (is_float($product) && $whatToDoWithPartialCents == self::PARTIAL_CENTS_THROW_EXCEPTION) {
             throw new Currency_USD_Exception("Multiply resulted in partial cents");
         }
@@ -362,6 +367,11 @@ class Currency_USD {
     public function divide($scalar, $whatToDoWithPartialCents = self::PARTIAL_CENTS_THROW_EXCEPTION) {
         $numCents = $this->toNumCents();
         $quotient = $numCents / $scalar;
+
+        if (is_float($quotient) && $quotient == intval($quotient)) {
+            // If it's a float, but lies on int boundaries, then just make it an int
+            $quotient = intval($quotient);
+        }
 
         if (is_float($quotient) && $whatToDoWithPartialCents == self::PARTIAL_CENTS_THROW_EXCEPTION) {
             throw new Currency_USD_Exception("Divide resulted in partial cents");

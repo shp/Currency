@@ -470,7 +470,7 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
             }
         }
         $givenProductObj = Currency_USD::fromFloat($productAsFloat);
-        $this->assertTrue($givenProductObj->equals($calculatedProductObj));
+        $this->assertTrue($givenProductObj->equals($calculatedProductObj), "Expected ({$givenProductObj}) != Actual ({$calculatedProductObj})");
     }
 
     public function currencyMultiplicationDataProvider() {
@@ -498,6 +498,10 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
             array(  -1.00,  0.333,  $roundUp,           -0.33,      false),
             array(  -1.00,  0.333,  $roundNearest,      -0.33,      false),
             array(  -1.00,  0.666,  $roundNearest,      -0.67,      false),
+            array(  1.00,   0.5,    $roundUp,           0.5,        false),
+            array(  1.00,   0.5,    $roundNearest,      0.5,        false),
+            array(  1.00,   0.5,    $roundDown,         0.5,        false),
+            array(  1.00,   0.5,    $throwException,    0.5,        false),
         );
     }
 
@@ -548,6 +552,14 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
             array(  -1.00,  3,      $roundUp,           -0.33,      false),
             array(  -1.00,  3,      $roundNearest,      -0.33,      false),
             array(  -2.00,  3,      $roundNearest,      -0.67,      false),
+            array(  1.00,   2,      $roundUp,           0.5,        false),
+            array(  1.00,   2,      $roundNearest,      0.5,        false),
+            array(  1.00,   2,      $roundDown,         0.5,        false),
+            array(  1.00,   2,      $throwException,    0.5,        false),
+            array(  1.00,   2.0,    $roundUp,           0.5,        false),
+            array(  1.00,   2.0,    $roundNearest,      0.5,        false),
+            array(  1.00,   2.0,    $roundDown,         0.5,        false),
+            array(  1.00,   2.0,    $throwException,    0.5,        false),
         );
     }
 
