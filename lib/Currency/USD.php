@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2010 SecureHealthPay (http://www.securehealthpay.com)
+ * Copyright (c) 2010 Patientco Holdings, LLC (http://www.patientco.com)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,9 +22,9 @@
  * 
  * @category   Currency
  * @package    Currency
- * @copyright  Copyright (c) 2010 SecureHealthPay (http://www.securehealthpay.com)
+ * @copyright  Copyright (c) 2010 Patientco Holdings, LLC (http://www.patientco.com)
  * @license    http://www.opensource.org/licenses/mit-license.php MIT License
- * @author     Jason Ardell (on behalf of SecureHealthPay)
+ * @author     Jason Ardell (on behalf of Patientco)
  */
 
 class Currency_USD {
