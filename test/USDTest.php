@@ -742,4 +742,60 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
         } catch (Currency_USD_Divide_By_Zero_Exception $e) {
         }
     }
+
+    public function maxMinDataProvider() {
+        return array(
+            array(0   , 1   , 1   , 0)   ,
+            array(-1  , 1   , 1   , -1)  ,
+            array(-1  , 0   , 0   , -1)  ,
+            array(30  , 45  , 45  , 30)  ,
+            array(-30 , -45 , -30 , -45) ,
+            array(-30 , 45  , 45  , -30) ,
+            array(30  , -45 , 30  , -45) ,
+            array(30  , 30  , 30  , 30)  ,
+            array(1   , 1   , 1   , 1 )  ,
+            array(0   , 0   , 0   , 0 )  ,
+            array(-1  , -1  , -1  , -1)  ,
+            array(-30 , -30 , -30 , -30) ,
+        );
+    }
+    /**
+     * @dataProvider maxMinDataProvider
+     */
+    public function testMaxReturnsCorrectResult($left, $right, $max, $min) {
+        $this->assertTrue(max($left, $right) === $max);
+        $this->assertTrue(max($right, $left) === $max);
+        $leftCurrency = Currency_USD::fromNumCents($left);
+        $rightCurrency = Currency_USD::fromNumCents($right);
+        $maxCurrency = Currency_USD::fromNumCents($max);
+        $this->assertTrue(Currency_USD::max($leftCurrency, $rightCurrency)->equals($maxCurrency));
+        $this->assertTrue(Currency_USD::max($rightCurrency, $leftCurrency)->equals($maxCurrency));
+    }
+    /**
+     * @dataProvider maxMinDataProvider
+     */
+    public function testMinReturnsCorrectResult($left, $right, $max, $min) {
+        $this->assertTrue(min($left, $right) === $min);
+        $leftCurrency = Currency_USD::fromNumCents($left);
+        $rightCurrency = Currency_USD::fromNumCents($right);
+        $minCurrency = Currency_USD::fromNumCents($min);
+        $this->assertTrue(Currency_USD::min($leftCurrency, $rightCurrency)->equals($minCurrency));
+        $this->assertTrue(Currency_USD::min($rightCurrency, $leftCurrency)->equals($minCurrency));
+    }
+    /**
+     * @dataProvider maxMinDataProvider
+     */
+    public function testMaxIsGreaterThanMin($left, $right, $max, $min) {
+        $this->assertTrue($max >= $min);
+        $this->assertTrue(is_int($left));
+        $this->assertTrue(is_int($right));
+        $this->assertTrue(is_int($max));
+        $this->assertTrue(is_int($min));
+        $minCurrency = Currency_USD::fromNumCents($min);
+        $maxCurrency = Currency_USD::fromNumCents($max);
+        $this->assertTrue($maxCurrency->isGreaterThanOrEqualTo($minCurrency));
+        $this->assertTrue($minCurrency->isLessThanOrEqualTo($maxCurrency));
+        $this->assertFalse($maxCurrency->isLessThan($minCurrency));
+        $this->assertFalse($minCurrency->isGreaterThan($maxCurrency));
+    }
 }

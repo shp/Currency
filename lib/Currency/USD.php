@@ -620,6 +620,30 @@ class Currency_USD {
     }
 
     /**
+     * Returns the larger of the two currency objects (or the smaller negative)
+     *
+     * @param Currency_USD $left A object to which we want to compare.
+     * @param Currency_USD $right A object to which we want to compare.
+     *
+     * @return Currency_USD Either $left or $right, whichever is bigger
+     */
+    public static function max(Currency_USD $left, Currency_USD $right) {
+        return $left->isLessThan($right) ? $right : $left;
+    }
+
+    /**
+     * Returns the smaller of the two currency objects (or the larger negative)
+     *
+     * @param Currency_USD $left A object to which we want to compare.
+     * @param Currency_USD $right A object to which we want to compare.
+     *
+     * @return Currency_USD Either $left or $right, whichever is smaller
+     */
+    public static function min(Currency_USD $left, Currency_USD $right) {
+        return $left->isLessThan($right) ? $left : $right;
+    }
+
+    /**
      * Calculate a percentage that one currency object is of another
      *
      * @param Currency_USD $a The numerator Currency_USD object.
