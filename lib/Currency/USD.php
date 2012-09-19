@@ -72,6 +72,54 @@ class Currency_USD {
     }
 
     /**
+     * Create a Currency_USD from a string and round.
+     *
+     * @param string $strVal Input string in format $-123.45.
+     * @param int    $numDecimal is the number of characters following the decimal
+     *
+     * @throws Currency_USD_Exception If we are unable to parse the string into a currency.
+     * @throws Currency_USD_Invalid_Value_Exception If the input value is invalid.
+     * @return Currency_USD Currency object
+     */
+    public static function fromStringRound($strVal, $numDecimal) {
+        if ($strVal === null) {
+            throw new Currency_USD_Invalid_Value_Exception("\$strVal cannot be null.");
+        }
+        if (!is_string($strVal)) {
+            throw new Currency_USD_Invalid_Value_Exception("\$strVal is not a string");
+        }
+        if ($strVal === "") {
+            throw new Currency_USD_Invalid_Value_Exception("\$strVal cannot be empty-string.");
+        }
+        if ($numDecimal === null) {
+            throw new Currency_USD_Invalid_Value_Exception("\$numDecimal cannot be null.");
+        }
+        if (!is_int($numDecimal)) {
+            throw new Currency_USD_Invalid_Value_Exception("\$numDecimal is not an int");
+        }
+        if ($numDecimal < 3) {
+            throw new Currency_USD_Invalid_Value_Exception("\$numDecimal cannot be 2 or less");
+        }
+
+        $regex   = "/^[\$]?(\-?)[\$]?([\d,]*)\.([\d]{{$numDecimal}})$/";
+        $matches = array();
+        $result  = preg_match($regex, $strVal, $matches);
+
+        if ($result == 0) {
+            throw new Currency_USD_Exception("Unable to parse string '{$strVal}' as currency");
+        }
+        $dollars    = (isset($matches[2]) ? self::_cleanDollarAmount($matches[2]) : 0);
+        $cents      = intVal(round(intVal($matches[3]) * 100 / (pow(10, $numDecimal))));
+        $isNegative = (isset($matches[1]) && $matches[1] == '-');
+        if ($isNegative) {
+            $cents = $cents * -1;
+        }
+
+        // Added this sum to handle if cents rounds to 100
+        return self::fromDollarsAndCents($dollars, 0, $isNegative)->add(self::fromNumCents($cents));
+    }
+
+    /**
      * Create a Currency_USD object from an int.
      *
      * @param integer $intVal The integer you want to tunr into a Currency_USD object.
