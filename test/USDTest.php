@@ -19,7 +19,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- * 
+ *
  * @category   Currency
  * @package    Currency
  * @copyright  Copyright (c) 2010 Patientco Holdings, LLC (http://www.patientco.com)
@@ -103,6 +103,45 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
             array(123,              null,     null, null,  true),
             array('',               null,     null, null,  true),
         );
+    }
+
+    public function currencyAsStringWithFractionalCents() {
+        return array(
+            //    String     #Decimals  Dollar  Cen  IsNegative expException
+            array('0.0012',     4,        0,     0,    false,    false),
+            array('-0.0012',    4,        0,     0,    false,    false),
+            array('85.996',     3,        86,    0,    false,    false),
+            array('-85.996',    3,        86,    0,    true,     false),
+            array('85.9965',    4,        86,    0,    false,    false),
+            array('-85.9965',   4,        86,    0,    true,     false),
+            array('0.00132',    5,        0,     0,    false,    false),
+            array('-0.00132',   5,        0,     0,    false,    false),
+
+            array('0.4312',     4,        0,     43,   false,    false),
+            array('-0.4312',    4,        0,     43,   true,     false),
+            array('85.596',     3,        85,    60,   false,    false),
+            array('-85.596',    3,        85,    60,   true,     false),
+            array('85.3835',    4,        85,    38,   false,    false),
+            array('-85.3835',   4,        85,    38,   true,     false),
+            array('0.01132',    5,        0,     1,    false,    false),
+            array('-0.01132',   5,        0,     1,    true,     false),
+        );
+    }
+
+    /**
+     * @dataProvider currencyAsStringWIthFractionalCents
+     */
+    public function testCanHandleRoundingCentsFromString($strVal, $numDecimal, $dollars, $cents, $isNegative, $expectedException) {
+        try {
+            $currency = Currency_USD::fromStringRound($strVal, $numDecimal);
+            $this->assertFalse($expectedException, "Exception expected, but none thrown");
+
+            $this->assertEquals($dollars, $currency->getDollars());
+            $this->assertEquals($cents, $currency->getCents());
+            $this->assertEquals($isNegative, $currency->isNegative());
+        } catch(Currency_USD_Exception $ex) {
+            $this->assertTrue($expectedException, "Exception thrown, but none expected");
+        }
     }
 
     /**
