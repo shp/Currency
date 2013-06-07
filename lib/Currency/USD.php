@@ -441,6 +441,17 @@ class Currency_USD {
     }
 
     /**
+     * Returns the absolute value of this Currency_USD object. Does not modify the original object.
+     *
+     * @return Currency_USD The absolute value as a Currency_USD object.
+     */
+    public function abs() {
+        $curr = clone $this;  // prevents the original object from being modified
+        $curr->setIsNegative(false);
+        return $curr;
+    }
+
+    /**
      * Validate a dollar amount.
      *
      * @param integer $dollars The integer number of dollars.

@@ -837,4 +837,25 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
         $this->assertFalse($maxCurrency->isLessThan($minCurrency));
         $this->assertFalse($minCurrency->isGreaterThan($maxCurrency));
     }
+
+
+    public function absDataProvider() {
+        return array(
+            array( 0    , 0,  ),
+            array( 0.10 , 0.10),
+            array( 9.37 , 9.37),
+            array(-1.52 , 1.52),
+            array(-0.99 , 0.99),
+        );
+    }
+
+    /**
+     * @dataProvider absDataProvider
+     */
+    public function testAbs($input, $expected) {
+        $inputObj    = Currency_USD::fromfloat($input);
+        $expectedObj = Currency_USD::fromfloat($expected);
+        $this->assertTrue($inputObj->abs()->equals($expectedObj));
+        $this->assertTrue($inputObj->equals(Currency_USD::fromfloat($input))); // Check that the original object was not modifed by the abs() call
+    }
 }
