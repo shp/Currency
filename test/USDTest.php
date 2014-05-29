@@ -690,10 +690,11 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
     /**
      * @dataProvider formattedStringDataProvider
      */
-    public function testFormattedStringFormatsCurrencyCorrectly($amountAsFloat, $amountAsString) {
+    public function testFormattedStringFormatsCurrencyCorrectly($amountAsFloat, $amountAsString, $amountAsStringWithCommas) {
         $currencyObj = Currency_USD::fromFloat($amountAsFloat);
         $this->assertEquals("{$amountAsString}", $currencyObj->formattedString(false, false));
         $this->assertEquals("\${$amountAsString}", $currencyObj->formattedString(true, false));
+        $this->assertEquals("\${$amountAsStringWithCommas}", $currencyObj->formattedString(true, true));
     }
 
     public function testFormattedStringFormatsWithCommasCorrectlyWhenNeeded() {
@@ -702,15 +703,15 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
 
     public function formattedStringDataProvider() {
         return array(
-            array(123.45,       "123.45"),
-            array(1.00,         "1.00"),
-            array(1.50,         "1.50"),
-            array(0.50,         "0.50"),
-            array(0.00,         "0.00"),
-            array(158.70,       "158.70"),
-            array(158.07,       "158.07"),
-            array(-158.70,      "-158.70"),
-            array(1032234.43,      "1,032,234.43"),
+            array(123.45,       "123.45", "123.45"),
+            array(1.00,         "1.00", "1.00"),
+            array(1.50,         "1.50", "1.50"),
+            array(0.50,         "0.50", "0.50"),
+            array(0.00,         "0.00", "0.00"),
+            array(158.70,       "158.70", "158.70"),
+            array(158.07,       "158.07", "158.07"),
+            array(-158.70,      "-158.70", "-158.70"),
+            array(1032234.43,      "1032234.43", "1,032,234.43"),
         );
     }
 
