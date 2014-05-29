@@ -250,16 +250,16 @@ class Currency_USD {
      * @throws Currency_USD_Exception If includeDollarSign is not boolean.
      * @return string A string representation of this object.
      */
-    public function formattedString($includeDollarSign = false, $includeCommaForThousands = false) {
+     public function formattedString($includeDollarSign = false, $includeCommaForThousands = false) {
         if ($includeDollarSign !== true && $includeDollarSign !== false) {
             throw new Currency_USD_Exception('Please specify true or false for $includeDollarSign');
         }
         if ($includeCommaForThousands !== true && $includeCommaForThousands !== false) {
             throw new Currency_USD_Exception('Please specify true or false for $includeCommaForThousands');
         }
-
         if ($includeCommaForThousands) {
-            $dollars = $this->_getDollarsWithCommas();
+            setlocale(LC_MONETARY, 'en_US');
+            $dollars = money_format('%!.0n', $this->getDollars());
         } else {
             $dollars = $this->getDollars();
         }
@@ -271,6 +271,7 @@ class Currency_USD {
         if ($this->isNegative()) {
             $negativeSign = '-';
         }
+        
         return "{$dollarSign}{$negativeSign}{$dollars}.{$this->_getTwoDigitNumCents()}";
     }
 
