@@ -283,34 +283,6 @@ class Currency_USD {
     }
 
     /**
-     * Adds commas to dollar amounts where necessary.
-     *
-     * @return string A string representation of the dollars of this object with commas added when thousands and higher occur.
-     */
-    public function _getDollarsWithCommas() {
-        if ($this->getDollars() < 1000) {
-            return $this->getDollars();
-        }
-        $arrayOfDollars = array();
-        $dollars = $this->getDollars();
-        while ($dollars != $dollars % 1000) {
-            $arrayOfDollars[] = $dollars % 1000;
-            $dollars = floor($dollars / 1000);
-        }
-        $arrayOfDollars[] = $dollars;
-        $dollarsString = $arrayOfDollars[0];
-        $index = 1;
-        while ($arrayOfDollars[count($arrayOfDollars) - 1] !== $arrayOfDollars[$index]) {
-            // the sprintf call ensures that a value with leading zeroes is properly represented.
-            $dollarsString = $arrayOfDollars[$index] . "," . sprintf("%03s", $dollarsString);
-            $index++;
-        }
-        $dollarsString = $arrayOfDollars[$index] . "," . sprintf("%03s", $dollarsString);
-
-        return $dollarsString;
-    }
-
-    /**
      * The default representation of this object: a string with no dollar sign.
      *
      * @return string A string representation of this object.
