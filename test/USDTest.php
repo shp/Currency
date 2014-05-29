@@ -710,6 +710,7 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
             array(158.70,       "158.70"),
             array(158.07,       "158.07"),
             array(-158.70,      "-158.70"),
+            array(1032234.43,      "1,032,234.43"),
         );
     }
 
