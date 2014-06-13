@@ -57,7 +57,7 @@ class Currency_USD {
             throw new Currency_USD_Invalid_Value_Exception("\$strVal cannot be empty-string.");
         }
 
-        $regex   = "/^[\$]?(\-?)[\$]?([\d,]*)\.?([\d]{0,2})$/";
+        $regex   = "/^[\$]?([\-\+]?)[\$]?([\d,]*)\.?([\d]{0,2})$/";
         $matches = array();
         $result  = preg_match($regex, $strVal, $matches);
 
@@ -101,7 +101,7 @@ class Currency_USD {
             throw new Currency_USD_Invalid_Value_Exception("\$numDecimal cannot be 2 or less");
         }
 
-        $regex   = "/^[\$]?(\-?)[\$]?([\d,]*)\.([\d]{{$numDecimal}})$/";
+        $regex   = "/^[\$]?([\-\+]?)[\$]?([\d,]*)\.([\d]{{$numDecimal}})$/";
         $matches = array();
         $result  = preg_match($regex, $strVal, $matches);
 
