@@ -272,7 +272,7 @@ class Currency_USD {
             $negativeSign = '-';
         }
         
-        return "{$dollarSign}{$negativeSign}{$dollars}.{$this->_getTwoDigitNumCents()}";
+        return "{$negativeSign}{$dollarSign}{$dollars}.{$this->_getTwoDigitNumCents()}";
     }
 
     /**
