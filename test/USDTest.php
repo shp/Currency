@@ -700,7 +700,7 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
         }
         if(substr($amountAsStringWithCommas, 0,1) === '-'){
             $amountAsStringWithCommasNegative = '-';
-            $amountAsStringWithCommas = substr($amountAsString, 1);
+            $amountAsStringWithCommas = substr($amountAsStringWithCommas, 1);
         }
         $this->assertEquals("{$amountAsStringNegative}{$amountAsString}", $currencyObj->formattedString(false, false));
         $this->assertEquals("{$amountAsStringNegative}\${$amountAsString}", $currencyObj->formattedString(true, false));
