@@ -692,9 +692,17 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
      */
     public function testFormattedStringFormatsCurrencyCorrectly($amountAsFloat, $amountAsString, $amountAsStringWithCommas) {
         $currencyObj = Currency_USD::fromFloat($amountAsFloat);
+        $amountAsStringNegative = '';
+        $amountAsStringWithCommasNegative = '';
+        if(substr($amountAsString, 0,1) === '-'){
+            $amountAsStringNegative = '-';
+        }
+        if(substr($amountAsStringWithCommas, 0,1) === '-'){
+            $amountAsStringWithCommasNegative = '-';
+        }
         $this->assertEquals("{$amountAsString}", $currencyObj->formattedString(false, false));
-        $this->assertEquals("\${$amountAsString}", $currencyObj->formattedString(true, false));
-        $this->assertEquals("\${$amountAsStringWithCommas}", $currencyObj->formattedString(true, true));
+        $this->assertEquals("{$amountAsStringNegative}\${$amountAsString}", $currencyObj->formattedString(true, false));
+        $this->assertEquals("{$amountAsStringWithCommasNegative}\${$amountAsStringWithCommas}", $currencyObj->formattedString(true, true));
     }
 
     public function testFormattedStringFormatsWithCommasCorrectlyWhenNeeded() {
