@@ -32,7 +32,6 @@
  *
  * @link http://www.phpunit.de/pocket_guide/3.0/en/writing-tests-for-phpunit.html
  */
-
 class Currency_USDTest extends PHPUnit_Framework_TestCase {
     /**
      * Test whether we can create a currency object from a string.
@@ -89,6 +88,16 @@ class Currency_USDTest extends PHPUnit_Framework_TestCase {
             array('-123.45',        123,        45, true,  false),
             array('$-123.45',       123,        45, true,  false),
             array('-$123.45',       123,        45, true,  false),
+            array('0-',             0,          0,  true,  false),
+            array('0.0-',           0,          0,  true,  false),
+            array('0.00-',          0,          0,  true,  false),
+            array('1.23-',          1,          23, true,  false),
+            array('1-',             1,          0,  true,  false),
+            array('1.2-',           1,          20, true,  false),
+            array('12.34-',         12,         34, true,  false),
+            array('123.45-',        123,        45, true,  false),
+            array('$123.45-',       123,        45, true,  false),
+            array('$1,234.56-',     1234,       56, true,  false),
             array('1,234.56',       1234,       56, false, false),
             array('12,345.67',      12345,      67, false, false),
             array('123,456.78',     123456,     78, false, false),

@@ -57,16 +57,22 @@ class Currency_USD {
             throw new Currency_USD_Invalid_Value_Exception("\$strVal cannot be empty-string.");
         }
 
-        $regex   = "/^[\$]?([\-\+]?)[\$]?([\d,]*)\.?([\d]{0,2})$/";
+        // Negative at the begining or the end
+        $replacedString = preg_replace("/(^-\\$?|^\\$-|-$)/", "", $strVal);
+        // If we changed the string, then there were negatives!
+        $isNegative = $replacedString !== $strVal;
+
+        // Update the string to the one without negative signs, signs determined above
+        $strVal  = $replacedString;
+        $regex   = "/^[\$]?(?<dollars>[\d,]*)\.?(?<cents>[\d]{0,2})$/";
         $matches = array();
         $result  = preg_match($regex, $strVal, $matches);
 
         if ($result == 0) {
             throw new Currency_USD_Exception("Unable to parse string '{$strVal}' as currency");
         }
-        $dollars    = (isset($matches[2]) ? self::_cleanDollarAmount($matches[2]) : 0);
-        $cents      = (isset($matches[3]) ? self::_parseCentsFromString($matches[3]) : 0);
-        $isNegative = (isset($matches[1]) && $matches[1] == '-');
+        $dollars    = (isset($matches["dollars"]) ? self::_cleanDollarAmount($matches["dollars"]) : 0);
+        $cents      = (isset($matches["cents"]) ? self::_parseCentsFromString($matches["cents"]) : 0);
 
         return self::fromDollarsAndCents($dollars, $cents, $isNegative);
     }
